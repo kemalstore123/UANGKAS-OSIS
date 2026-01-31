@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Uang Kas</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eaeaea;
+            padding: 20px;
+        }
+        .box {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+            text-align: center;
+        }
+        img {
+            width: 90px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+            width: 95%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <img src="logo.png">
+    <h2>UANG KAS</h2>
+
+    <input type="text" id="nama" placeholder="Nama">
+    <input type="number" id="jumlah" placeholder="Jumlah Uang">
+
+    <button onclick="tambah()">➕ Tambah</button>
+    <button onclick="kurang()">➖ Kurang</button>
+
+    <h3 id="saldo">Saldo: Rp 0</h3>
+
+    <h3>Laporan Transaksi</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Jenis</th>
+                <th>Jumlah</th>
+            </tr>
+        </thead>
+        <tbody id="laporan"></tbody>
+    </table>
+</div>
+
+<script>
+    let saldo = 0;
+    let data = [];
+
+    // LOAD DATA SAAT HALAMAN DIBUKA
+    if (localStorage.getItem("uangkas")) {
+        data = JSON.parse(localStorage.getItem("uangkas"));
+        saldo = data.reduce((s, d) => {
+            return d.jenis === "Tambah" ? s + d.jumlah : s - d.jumlah;
+        }, 0);
+        tampilkan();
+    }
+
+    function tambah() {
+        proses("Tambah");
+    }
+
+    function kurang() {
+        proses("Kurang");
+    }
+
+    function proses(jenis) {
+        let nama = document.getElementById("nama").value;
+        let jumlah = parseInt(document.getElementById("jumlah").value);
+
+        if (nama === "" || isNaN(jumlah)) {
+            alert("Nama dan jumlah harus diisi!");
+            return;
+        }
+
+        data.push({ nama, jenis, jumlah });
+        localStorage.setItem("uangkas", JSON.stringify(data));
+        tampilkan();
+    }
+
+    function tampilkan() {
+        let tbody = document.getElementById("laporan");
+        tbody.innerHTML = "";
+        saldo = 0;
+
+        data.forEach((d, i) => {
+            saldo += d.jenis === "Tambah" ? d.jumlah : -d.jumlah;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${d.nama}</td>
+                    <td>${d.jenis}</td>
+                    <td>Rp ${d.jumlah}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("saldo").innerText =
+            "Saldo: Rp " + saldo;
+    }
+</script>
+
+</body>
+</html>
